@@ -17,7 +17,7 @@ import { z } from 'zod'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 
-import { isUndefined } from 'lodash'
+import { isNull, isUndefined } from 'lodash'
 
 interface SceneProps {
   className?: string
@@ -60,6 +60,9 @@ export const Scene: React.FC<SceneProps> = () => {
 
   const [skinsList, setSkinsList] = useState<string[]>([])
   const [animationList, setAnimationList] = useState<string[]>([])
+
+  const isSkelFile = !isNull(fileList.skel.file)
+
 
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
@@ -152,10 +155,10 @@ export const Scene: React.FC<SceneProps> = () => {
 
       const { assetManager } = sceneRef.current
       if (!assetManager) return
-      const { skel, atlas } = fileList
-      assetManager.loadBinary(skel.name);
+      const { skel, atlas, json } = fileList
       assetManager.loadTextureAtlas(atlas.name);
-
+      if (isSkelFile) assetManager.loadBinary(skel.name);
+      if (!isSkelFile) assetManager.loadJson(json.name);
       await assetManager.loadAll();
       // 检查加载状态
       const checkLoading = () => {
@@ -175,39 +178,30 @@ export const Scene: React.FC<SceneProps> = () => {
 
       try {
         // 加载纹理图集
-        const { skel, atlas } = fileList
+        const { skel, atlas, json } = fileList
         const atlasResource = assetManager.require(atlas.name)
         const atlasLoader = new spine.AtlasAttachmentLoader(atlasResource)
 
         // 创建骨架加载器
-        const skeletonLoader = new spine.SkeletonBinary(atlasLoader)
+
+        const skeletonLoader = isSkelFile ? new spine.SkeletonBinary(atlasLoader) : new spine.SkeletonJson(atlasLoader)
 
         // 加载骨架数据
-        const skeletonData = skeletonLoader.readSkeletonData(assetManager.require(skel.name))
+        const skeletonData = skeletonLoader.readSkeletonData(assetManager.require(isSkelFile ? skel.name : json.name))
         const skeleton = new spine.Skeleton(skeletonData)
         sceneRef.current.skeleton = skeleton
-        // form.setValue('skeletonVersion', skeleton.data.version)
         const skinsList = skeleton.data.skins.map((skin: spine.Skin) => skin.name)
 
-        // dispatch(setSkin(skinsList))
         setSkinsList(skinsList)
         let initSkin = skinsList.find((skin: string) => skin !== 'default')
         if (isUndefined(initSkin)) initSkin = 'default'
         SkelSetSkin(initSkin)
-        // form.setValue('skins', initSkin)
         // 创建动画状态
         const animationStateData = new spine.AnimationStateData(skeleton.data)
         const animationState = new spine.AnimationState(animationStateData)
         sceneRef.current.state = animationState
-
         const animationsList = skeleton.data.animations.map((animation: spine.Animation) => animation.name)
-
         setAnimationList(animationsList)
-        // form.reset({
-        //   // animations: animationsList[0],
-        //   skeletonVersion: skeleton.data.version
-        // });
-        // SkelSetAnimation(animationList[0])
         form.setValue('skeletonVersion', skeleton.data.version)
         // 保存骨架和状态
       } catch (error) {

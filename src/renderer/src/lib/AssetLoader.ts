@@ -279,6 +279,12 @@ export class LocalReduxDownloader {
         request.onerror = done
         request.send()
     }
+	downloadJson (url: string, success: (data: object) => void, error: (status: number, responseText: string) => void) {
+        console.log(url)
+		this.downloadText(url, (data: string): void => {
+			success(JSON.parse(data));
+		}, error);
+	}
 
     downloadBinary(url: string, success: (data: Uint8Array) => void, error: (status: number, responseText: string) => void) {
         if (this.start(url, success, error)) return

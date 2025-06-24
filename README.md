@@ -11,7 +11,7 @@
 
 ## English
 
-A Spine animation viewer built with Electron + React + TypeScript, supporting Spine 3.8 and 4.0+ versions.
+A Spine animation viewer built with Electron + React + TypeScript, supporting Spine **3.8.x, 4.0,x, 4.1.x, 4.2.x** versions.
 
 ### ✨ Features
 

@@ -1,10 +1,13 @@
+import { BrowserWindow } from 'electron';
+import { ipcMain } from 'electron-better-ipc'
+
+const mainWindow = BrowserWindow.getAllWindows()[0]
 export const getJsonVersion = (file: NonSharedBuffer) => {
     try {
         // 将 buffer 转换为字符串
         const jsonString = file.toString('utf8');
         // 解析 JSON
         const jsonData = JSON.parse(jsonString);
-        
         // 检查是否有 skeleton 对象和 spine 字段
         if (jsonData.skeleton && jsonData.skeleton.spine) {
             return jsonData.skeleton.spine;
@@ -12,7 +15,7 @@ export const getJsonVersion = (file: NonSharedBuffer) => {
         
         return null;
     } catch (error) {
-        console.error('Error parsing JSON file:', error);
+        ipcMain.callRenderer(mainWindow, 'toast-message', `${error}`)
         return null;
     }
 }
@@ -37,7 +40,7 @@ export const getSkelVersion = (file: NonSharedBuffer) => {
         
         return null;
     } catch (error) {
-        console.error('Error parsing skel file:', error);
+        ipcMain.callRenderer(mainWindow, 'toast-message', `${error}`)
         return null;
     }
 }

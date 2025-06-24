@@ -1,9 +1,9 @@
-import { LocalReduxDownloader, LocalAssetLoader as AssetManager } from '@/lib/spine4.0/AssetLoader'
+import { LocalReduxDownloader, LocalAssetLoader as AssetManager } from '@/lib/spine4.2/AssetLoader'
 import { RootState } from '@/store'
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { useSelector } from 'react-redux'
-import * as spine from 'spine-webgl40'
-import { ManagedWebGLRenderingContext } from 'spine-webgl40'
+import * as spine from 'spine-webgl42'
+import { ManagedWebGLRenderingContext } from 'spine-webgl42'
 import { z } from 'zod'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -97,7 +97,7 @@ export const Scene: React.FC<SceneProps> = () => {
 
     skeleton.scaleX *= scale
     skeleton.scaleY *= scale
-    skeleton.updateWorldTransform()
+    skeleton.updateWorldTransform(spine.Physics.update)
     skeleton.x = canvas.width / 2
     skeleton.y = canvas.height * skeleton.scaleY * 0.1 / 2
   }, [])
@@ -197,10 +197,10 @@ export const Scene: React.FC<SceneProps> = () => {
         sceneRef.current.state = animationState
         const animationsList = skeleton.data.animations.map((animation: spine.Animation) => animation.name)
         setAnimationList(animationsList)
-        form.setValue('skeletonVersion', skeleton.data.version)
+        form.setValue('skeletonVersion', skeleton.data.version || '')
         // 保存骨架和状态
       } catch (error) {
-        // console.error('Failed to load skeleton:', error)   
+        // console.error('Failed to load skeleton:', error)
         toast.error(`Failed to load skeleton: ${error}`)
       }
     }
@@ -223,7 +223,7 @@ export const Scene: React.FC<SceneProps> = () => {
         // 更新动画
         state.update(delta)
         state.apply(skeleton)
-        skeleton.updateWorldTransform()
+        skeleton.updateWorldTransform(spine.Physics.update)
 
         // 绑定着色器
         shader.bind()

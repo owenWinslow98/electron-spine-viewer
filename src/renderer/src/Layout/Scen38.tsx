@@ -7,6 +7,7 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { isNull, isUndefined } from 'lodash'
 import { SkelForm } from './SkelForm'
+import { toast } from 'sonner'
 
 interface SceneProps {
   className?: string
@@ -169,7 +170,8 @@ export const Scene: React.FC<SceneProps> = () => {
       const { assetManager } = sceneRef.current;
       if (assetManager.isLoadingComplete()) {
         // 加载 skeleton
-        const { skel, atlas, json } = fileList
+        try {
+          const { skel, atlas, json } = fileList
         const atlasResource = assetManager.get(atlas.name)
         const atlasLoader = new spine.AtlasAttachmentLoader(atlasResource)
         const skeletonLoader = isSkelFile ? new spine.SkeletonBinary(atlasLoader) : new spine.SkeletonJson(atlasLoader)
@@ -194,10 +196,13 @@ export const Scene: React.FC<SceneProps> = () => {
         // 动画
         const animationStateData = new spine.AnimationStateData(skeleton.data);
         const animationState = new spine.AnimationState(animationStateData);
-        sceneRef.current.state = animationState
-        const animationsList = skeleton.data.animations.map((animation: spine.Animation) => animation.name)
-        setAnimationList(animationsList)
-        form.setValue('skeletonVersion', skeleton.data.version)
+          sceneRef.current.state = animationState
+          const animationsList = skeleton.data.animations.map((animation: spine.Animation) => animation.name)
+          setAnimationList(animationsList)
+          form.setValue('skeletonVersion', skeleton.data.version)
+        } catch (error) {
+          toast.error(`Failed to load skeleton: ${error}`)
+        }
       } else {
         loadId = requestAnimationFrame(load);
       }

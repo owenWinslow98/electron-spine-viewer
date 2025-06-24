@@ -4,6 +4,24 @@ import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import { getResources } from './module/utils'
 import { ipcMain as betterIpcMain } from 'electron-better-ipc'
 
+
+const validFileList = (fileList: string[]): boolean => {
+  const mainWindow = BrowserWindow.getAllWindows()[0]
+  if(fileList.length < 2) {
+    betterIpcMain.callRenderer(mainWindow, 'toast-message', 'at least two files are required.')
+    return false;
+  }
+  if(!fileList.some(file => file.endsWith('.skel') || file.endsWith('.json'))) {
+    betterIpcMain.callRenderer(mainWindow, 'toast-message', 'please select one skel(.skel) or json(.json) file.')
+    return false;
+  }
+  if(!fileList.some(file => file.endsWith('.atlas'))) {
+    betterIpcMain.callRenderer(mainWindow, 'toast-message', 'please select one atlas(.atlas) file.')
+    return false;
+  }
+  return true;
+}
+
 function createMenu(): void {
   const openFile = async () => {
     try {
@@ -16,6 +34,7 @@ function createMenu(): void {
           }
         ]
       })
+      if(!validFileList(result.filePaths)) return
       const fileList = await getResources(result.filePaths, BrowserWindow.getAllWindows()[0])
       const mainWindow = BrowserWindow.getAllWindows()[0]
       if (mainWindow) {
@@ -128,12 +147,14 @@ app.whenReady().then(() => {
         }
       ]
     })
+    if(!validFileList(result.filePaths)) return
     const fileList = await getResources(result.filePaths, BrowserWindow.getAllWindows()[0])
     return fileList 
   })
 
 
   ipcMain.handle('resolve-files-with-paths', async (_, paths: string[]) => {
+    if(!validFileList(paths)) return []
     const fileList = await getResources(paths, BrowserWindow.getAllWindows()[0])
     return fileList
   })

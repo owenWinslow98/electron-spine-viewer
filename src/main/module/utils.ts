@@ -18,7 +18,9 @@ export const getResources = async (filePathList: string[], mainWindow: BrowserWi
     const atlasPath = filePathList.find(path => path.endsWith('.atlas'))! || null
 
     if (!((!isNull(skelPath)) || (!isNull(jsonPath))) && !isNull(atlasPath)) {
+        ipcMain.callRenderer(mainWindow, 'toast-message', `both skel(.skel, .json) and teture(.atlas) are required.`)
         throw new Error('both skel(.skel, .json) and teture(.atlas) are required.')
+        
 
     }
     let skelfile
@@ -31,6 +33,7 @@ export const getResources = async (filePathList: string[], mainWindow: BrowserWi
         skelVersion = isNull(skelPath) ? getJsonVersion(jsonfile) :  getSkelVersion(skelfile)
         atlasfile = fs.readFileSync(atlasPath as string)
     } catch (error) {
+        ipcMain.callRenderer(mainWindow, 'toast-message', `${error}`)
         throw new Error('read file error.')
     }
 
@@ -82,6 +85,7 @@ export const getResources = async (filePathList: string[], mainWindow: BrowserWi
                 file: fsRaw
             }
         } catch (error) {
+            ipcMain.callRenderer(mainWindow, 'toast-message', `${error}`)
             throw new Error(`${abPath} file not found or broken.`)
         }
     })

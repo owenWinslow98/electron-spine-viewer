@@ -40,6 +40,8 @@
     "react-redux": "^9.2.0",
     "sonner": "^2.0.5",
     "spine-webgl40": "npm:@esotericsoftware/spine-webgl@^4.0.30",
+    "spine-webgl41": "npm:@esotericsoftware/spine-webgl@^4.1.55",
+    "spine-webgl42": "npm:@esotericsoftware/spine-webgl@^4.2.84",
     "tailwind-merge": "^3.3.1",
     "tailwindcss": "^4.1.10",
     "tw-animate-css": "^1.3.4",

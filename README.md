@@ -2,7 +2,8 @@
 
 ![File Import](./preview.gif)
 
-
+windows verison: https://github.com/owenWinslow98/electron-spine-viewer/releases/tag/v1.3.0
+mac version: you need to build from source code yourself
 
 [English](#english) | [中文](#中文)
 

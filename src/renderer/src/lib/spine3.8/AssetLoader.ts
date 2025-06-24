@@ -200,14 +200,14 @@ export class AssetManager implements Disposable {
         this.toLoad++;
         let img = new Image();
         img.crossOrigin = "anonymous";
-        img.onload = (ev) => {
+        img.onload = () => {
             let texture = this.textureLoader(img);
             this.assets.set(storagePath, texture);
             this.toLoad--;
             this.loaded++;
             if (success) success(path, img);
         }
-        img.onerror = (ev) => {
+        img.onerror = () => {
             this.errors.set(path, `Couldn't load image ${path}`);
             this.toLoad--;
             this.loaded++;
@@ -240,7 +240,7 @@ export class AssetManager implements Disposable {
             try {
                 // 使用全局 spine 对象
                 const { TextureAtlas, FakeTexture } = (window as any).spine38;
-                let atlas = new TextureAtlas(atlasData, (path: string) => {
+                new TextureAtlas(atlasData, (path: string) => {
                     atlasPages.push(parent == "" ? path : parent + "/" + path);
                     let image = document.createElement("img") as HTMLImageElement;
                     image.width = 16;
@@ -258,7 +258,7 @@ export class AssetManager implements Disposable {
 
             for (let atlasPage of atlasPages) {
                 let pageLoadError = false;
-                this.loadTexture(atlasPage, (imagePath: string, image: HTMLImageElement) => {
+                this.loadTexture(atlasPage, (imagePath: string) => {
                     pagesLoaded.count++;
 
                     if (pagesLoaded.count == atlasPages.length) {
@@ -286,7 +286,7 @@ export class AssetManager implements Disposable {
                             this.loaded++;
                         }
                     }
-                }, (imagePath: string, errorMessage: string) => {
+                }, (imagePath: string) => {
                     pageLoadError = true;
                     pagesLoaded.count++;
 
@@ -319,7 +319,7 @@ export class AssetManager implements Disposable {
     }
 
     removeAll() {
-        this.assets.forEach((asset, key) => {
+        this.assets.forEach((asset) => {
             if ((<any>asset).dispose) (<any>asset).dispose();
         });
         this.assets = new Map();

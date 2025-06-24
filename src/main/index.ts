@@ -129,19 +129,15 @@ app.whenReady().then(() => {
       ]
     })
     const fileList = await getResources(result.filePaths, BrowserWindow.getAllWindows()[0])
-    return fileList // 这里会包含完整路径
+    return fileList 
   })
 
 
   ipcMain.handle('resolve-files-with-paths', async (_, paths: string[]) => {
     const fileList = await getResources(paths, BrowserWindow.getAllWindows()[0])
-    return fileList // 这里会包含完整路径
+    return fileList
   })
 
-  ipcMain.on('file-dropped', (_, filePath) => {
-    console.log('拖入文件路径：', filePath);
-    // 可在这里处理 .skel / .atlas / .png 加载
-  });
 
   createWindow()
   createMenu()

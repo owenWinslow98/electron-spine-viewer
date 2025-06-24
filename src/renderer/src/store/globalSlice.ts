@@ -17,6 +17,7 @@ export interface GlobalState {
     json: SpineFile,
     atlas: SpineFile,
     skins: SpineFile[],
+    skelVersion: string | null
   }
 }
 
@@ -42,6 +43,7 @@ const initialState: GlobalState = {
       name: ''
     },
     skins: [],
+    skelVersion: null
   }
 }
 
@@ -72,11 +74,13 @@ export const globalSlice = createSlice({
       json: SpineFile | null,
       atlas: SpineFile | null,
       skins: SpineFile[],
+      skelVersion: string | null
     }>) => {
       if (action.payload.skel) state.fileList.skel = action.payload.skel
       if (action.payload.json) state.fileList.json = action.payload.json
       if (action.payload.atlas) state.fileList.atlas = action.payload.atlas
       if (action.payload.skins) state.fileList.skins = action.payload.skins
+      if (action.payload.skelVersion) state.fileList.skelVersion = action.payload.skelVersion
     },
   },
 })

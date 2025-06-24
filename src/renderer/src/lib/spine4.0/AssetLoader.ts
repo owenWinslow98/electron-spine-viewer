@@ -1,5 +1,5 @@
-import { store } from '../store'
-import { RootState } from '../store'
+import { store } from '../../store'
+import { RootState } from '../../store'
 import { Disposable, Texture, Downloader, TextureAtlas, GLTexture, ManagedWebGLRenderingContext } from 'spine-webgl40'
 import { noop } from 'lodash'
 interface StringMap<T> {
@@ -280,7 +280,6 @@ export class LocalReduxDownloader {
         request.send()
     }
 	downloadJson (url: string, success: (data: object) => void, error: (status: number, responseText: string) => void) {
-        console.log(url)
 		this.downloadText(url, (data: string): void => {
 			success(JSON.parse(data));
 		}, error);

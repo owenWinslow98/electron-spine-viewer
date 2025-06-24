@@ -1,23 +1,15 @@
-import { LocalReduxDownloader, LocalAssetLoader as AssetManager } from '@/lib/AssetLoader'
+import { LocalReduxDownloader, LocalAssetLoader as AssetManager } from '@/lib/spine4.0/AssetLoader'
 import { RootState } from '@/store'
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { useSelector } from 'react-redux'
 import * as spine from 'spine-webgl40'
 import { ManagedWebGLRenderingContext } from 'spine-webgl40'
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
-import { Input } from '@/components/ui/input'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
 import { z } from 'zod'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 
 import { isNull, isUndefined } from 'lodash'
+import { SkelForm } from './SkelForm'
 
 interface SceneProps {
   className?: string
@@ -113,6 +105,8 @@ export const Scene: React.FC<SceneProps> = () => {
     const canvas = canvasRef.current
     if (!canvas) return
 
+    let checkLoadingId: number
+    let renderId: number
     const init = () => {
       // 设置画布尺寸
       canvas.width = canvas.clientWidth
@@ -166,7 +160,7 @@ export const Scene: React.FC<SceneProps> = () => {
           loadSkeleton()
           startRender()
         } else {
-          requestAnimationFrame(checkLoading)
+          checkLoadingId = requestAnimationFrame(checkLoading)
         }
       }
       checkLoading()
@@ -216,8 +210,8 @@ export const Scene: React.FC<SceneProps> = () => {
         sceneRef.current.lastFrameTime = now
 
         const { gl, shader, batcher, mvp, skeletonRenderer, skeleton, state } = sceneRef.current
-        if (!gl || !shader || !batcher || !mvp || !skeletonRenderer || !skeleton || !state) {
-          requestAnimationFrame(render)
+        if (!gl || !shader?.program || !batcher || !mvp || !skeletonRenderer || !skeleton || !state) {
+          renderId = requestAnimationFrame(render)
           return
         }
         // 清除画布
@@ -244,7 +238,7 @@ export const Scene: React.FC<SceneProps> = () => {
 
         shader.unbind()
 
-        requestAnimationFrame(render)
+        renderId = requestAnimationFrame(render)
       }
       render()
       resizeSkel()
@@ -258,9 +252,12 @@ export const Scene: React.FC<SceneProps> = () => {
       // 清理 WebGL 资源
       const { gl, shader, batcher } = sceneRef.current
       if (gl) {
+        if (shader?.program) gl?.deleteProgram(shader.program);
         if (shader) shader.dispose()
         if (batcher) batcher.dispose()
       }
+      if (checkLoadingId) cancelAnimationFrame(checkLoadingId)
+      if (renderId) cancelAnimationFrame(renderId)
     }
   }, [fileList])
   useEffect(() => {
@@ -293,72 +290,18 @@ export const Scene: React.FC<SceneProps> = () => {
 
   return (
     <div className='flex w-[100vw] h-full'>
-      <div className='w-64 h-full bg-background'>
-        <Form {...form}>
-          <form className="w-3/4 space-y-6 flex flex-col items-center justify-center h-full w-full">
-            <FormField
-              control={form.control}
-              name="skeletonVersion"
-              render={({ field }) => (
-                <FormItem className="w-3/4">
-                  <FormLabel>Skeleton Version</FormLabel>
-                  <Input {...field} disabled />
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="skins"
-              render={({ field }) => (
-                <FormItem className="w-3/4">
-                  <FormLabel>Skins</FormLabel>
-                  <Select onValueChange={(value) => {
-                    field.onChange(value)
-                    SkelSetSkin(value)
-                  }} name={field.name} value={field.value}>
-                    <FormControl>
-                      <SelectTrigger className="w-full">
-                        <SelectValue />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {skinsList.map(skin => <SelectItem value={skin} key={skin}>{skin}</SelectItem>)}
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="animations"
-              render={({ field }) => (
-                <FormItem className="w-3/4">
-                  <FormLabel>{field.name}</FormLabel>
-                  <Select onValueChange={(value) => {
-                    field.onChange(value)
-                    SkelSetAnimation(value)
-                  }} name={field.name} value={field.value}>
-                    <FormControl>
-                      <SelectTrigger className="w-full">
-                        <SelectValue />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {animationList.map(animation => <SelectItem value={animation} key={animation}>{animation}</SelectItem>)}
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </form>
-        </Form>
-      </div>
+      <SkelForm
+        onSkinChange={SkelSetSkin}
+        onAnimationChange={SkelSetAnimation}
+        form={form}
+        skinsList={skinsList}
+        animationList={animationList}
+      />
       <div className='flex-1 h-full' ref={containerRef}>
         <canvas
           ref={canvasRef}
+          id='spine40'
+          key='spine40'
           className="w-full h-full"
         />
       </div>

@@ -7,6 +7,7 @@ declare global {
     json: { file: Uint8Array | null; path: string | null, name: string }
     atlas: { file: Uint8Array | null; path: string | null, name: string }
     skins: { file: Uint8Array | null; path: string | null, name: string }[]
+    skelVersion: string | null
   }
   interface Window {
     electron: ElectronAPI

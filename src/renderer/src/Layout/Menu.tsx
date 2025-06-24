@@ -7,13 +7,6 @@ interface MenuProps {
     className?: string
 }
 
-interface FileList {
-    skel: { file: Uint8Array | null; path: string | null, name: string }
-    json: { file: Uint8Array | null; path: string | null, name: string }
-    atlas: { file: Uint8Array | null; path: string | null, name: string }
-    skins: { file: Uint8Array | null; path: string | null, name: string }[]
-}
-
 export const Menu: React.FC<MenuProps> = () => {
     const dispatch = useDispatch()
     const { ipc } = window
@@ -25,12 +18,12 @@ export const Menu: React.FC<MenuProps> = () => {
         }
         ipcRenderer.answerMain('open-file', handleFilesSelected)
       }, [])
-    const handleOpenFile = async (fileList: FileList) => {
+    const handleOpenFile = async (fileList: SpineFileList) => {
         try {
             // 使用 Electron 的文件对话框获取文件路径
             // const fileLsit = await window.api.selectFile()
-            const { skel, json, atlas, skins } = fileList
-
+            const { skel, json, atlas, skins, skelVersion } = fileList
+            console.log(fileList)
             const transformSkel = isNull(skel.file) ? null : URL.createObjectURL(new Blob([skel.file], { type: 'application/octet-stream' }))
             const transformJson = isNull(json.file) ? null : URL.createObjectURL(new Blob([json.file], { type: 'application/json' }))
             const transformAtlas = isNull(atlas.file) ? null : URL.createObjectURL(new Blob([atlas.file], { type: 'text/plain' }))
@@ -55,6 +48,7 @@ export const Menu: React.FC<MenuProps> = () => {
                     file: transformAtlas,
                 },
                 skins: transformSkins,
+                skelVersion: skelVersion
             }
             dispatch(setFileList(result))
         } catch (error) {

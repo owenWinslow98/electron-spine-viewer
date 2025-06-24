@@ -3,6 +3,7 @@ import { isNull } from 'lodash'
 import { BrowserWindow } from 'electron'
 import { ipcMain } from 'electron-better-ipc'
 import path from 'path'
+import { getJsonVersion, getSkelVersion } from './getResource'
 interface Resource {
     name: string
     path: string
@@ -23,10 +24,11 @@ export const getResources = async (filePathList: string[], mainWindow: BrowserWi
     let skelfile
     let jsonfile
     let atlasfile
-
+    let skelVersion 
     try {
         skelfile = isNull(skelPath) ? null : fs.readFileSync(skelPath)
         jsonfile = isNull(jsonPath) ? null : fs.readFileSync(jsonPath)
+        skelVersion = isNull(skelPath) ? getJsonVersion(jsonfile) :  getSkelVersion(skelfile)
         atlasfile = fs.readFileSync(atlasPath as string)
     } catch (error) {
         throw new Error('read file error.')
@@ -88,7 +90,8 @@ export const getResources = async (filePathList: string[], mainWindow: BrowserWi
         skel: skelResource,
         json: jsonResource,
         atlas: atlasResource,
-        skins: skinList
+        skins: skinList,
+        skelVersion: skelVersion
     }
     return result
 }

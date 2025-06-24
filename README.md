@@ -1,6 +1,11 @@
 # Electron Spine Viewer
 
+![File Import](./preview.gif)
+
+
+
 [English](#english) | [中文](#中文)
+
 
 ---
 
